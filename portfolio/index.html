@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kenna Getachew | Developer Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-logo">Kenna Getachew</div>
+
+    <ul class="nav-links" id="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">&#127769;</button>
+    <button class="hamburger" id="hamburger">&#9776;</button>
+  </nav>
+
+  <section class="hero">
+    <h1>Hi, I'm Kenna Getachew</h1>
+    <p>Computer Science Student at St. Mary's University &middot; Full-Stack Developer &middot; Internship Applicant &middot; Addis Ababa, Ethiopia (Remote-Ready)</p>
+    <div class="hero-buttons">
+      <a href="#projects" class="btn">See My Work</a>
+      <a href="resume.pdf" class="btn btn-outline" download>Download Resume</a>
+    </div>
+  </section>
+
+  <section id="about" class="section">
+    <h2>About Me</h2>
+    <p>
+      I'm a motivated Computer Science student at St. Mary's University in Addis Ababa, Ethiopia (2024&ndash;2028),
+      with hands-on experience in full-stack web development, object-oriented programming, and database management.
+      Certified in Full-Stack Development by Mimo &mdash; Professional Certificate, issued October 2026.
+    </p>
+    <p>
+      I have a strong foundation in Java, C++, JavaScript, React, and SQL. I'm eager to apply my technical skills
+      in a fully remote internship environment, contribute to real-world projects, and grow as a software developer.
+    </p>
+    <p>
+      &#128231; <a href="mailto:kennaget04@gmail.com">kennaget04@gmail.com</a>
+      &nbsp;|&nbsp;
+      &#128222; +251 97 979 7024
+      &nbsp;|&nbsp;
+      &#128205; Addis Ababa, Ethiopia (Remote-Ready)
+    </p>
+    <p>Languages: <strong>English</strong> (Intermediate) &nbsp;|&nbsp; <strong>Amharic</strong> (Native / Fluent)</p>
+  </section>
+
+  <section id="skills" class="section gray-bg">
+    <h2>Skills</h2>
+    <div class="skills-grid">
+      <div class="skill-card"><p>Java</p></div>
+      <div class="skill-card"><p>C++</p></div>
+      <div class="skill-card"><p>JavaScript</p></div>
+      <div class="skill-card"><p>SQL</p></div>
+      <div class="skill-card"><p>HTML5</p></div>
+      <div class="skill-card"><p>CSS3</p></div>
+      <div class="skill-card"><p>React</p></div>
+      <div class="skill-card"><p>Node.js</p></div>
+      <div class="skill-card"><p>Express.js</p></div>
+      <div class="skill-card"><p>Git &amp; GitHub</p></div>
+      <div class="skill-card"><p>VS Code</p></div>
+      <div class="skill-card"><p>Data Structures</p></div>
+      <div class="skill-card"><p>Algorithms</p></div>
+    </div>
+  </section>
+
+  <section id="projects" class="section">
+    <h2>Projects</h2>
+    <div class="projects-grid">
+
+      <div class="project-card">
+        <h3>Developer Portfolio Website</h3>
+        <p>Designed and built a personal portfolio website to showcase engineering projects and technical skills. Implemented a fully responsive, mobile-friendly user interface leveraging React components and modern CSS layout techniques. Deployed production code online to provide recruiters with seamless, live access to verified source code and functional work samples.</p>
+        <div class="project-tags">
+          <span>React</span>
+          <span>HTML5</span>
+          <span>CSS3</span>
+          <span>JavaScript</span>
+          <span>Responsive Design</span>
+        </div>
+      </div>
+
+      <a href="https://ecommerceapp-five-roan.vercel.app" target="_blank" rel="noopener noreferrer" class="project-card clickable-card">
+        <h3>E-Commerce Product Catalog</h3>
+        <p>Constructed a modern e-commerce storefront that dynamically fetches and processes product metadata from a backend database structure. Implemented client-side state management for cart persistence, featuring an interactive slide-out drawer, automated subtotal calculations, product filtering by category, and strict inventory boundaries.</p>
+        <div class="project-tags">
+          <span>JavaScript</span>
+          <span>State Management</span>
+          <span>CSS Grid</span>
+          <span>REST APIs</span>
+          <span>JSON Handling</span>
+        </div>
+      </a>
+
+      <a href="https://weatherforecast-phi-ebon.vercel.app" target="_blank" rel="noopener noreferrer" class="project-card clickable-card">
+        <h3>Real-Time Weather App</h3>
+        <p>Developed a live weather telemetry application utilizing asynchronous data streams to query global climate metrics. Users can search any city worldwide to instantly retrieve real-time temperature, humidity, wind velocity, and a structured multi-day forecast driven by dynamic, climate-responsive user interface variations.</p>
+        <div class="project-tags">
+          <span>JavaScript</span>
+          <span>Fetch API</span>
+          <span>Async/Await</span>
+          <span>CSS Flexbox</span>
+          <span>API Integration</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section id="contact" class="section gray-bg">
+    <h2>Contact Me</h2>
+    <p>Have a question or want to work together? Fill out the form below or reach me directly at <a href="mailto:kennaget04@gmail.com">kennaget04@gmail.com</a>.</p>
+
+    <form id="contact-form">
+      <input type="text"  id="name"    placeholder="Your Name"    required />
+      <input type="email" id="email"   placeholder="Your Email"   required />
+      <textarea           id="message" placeholder="Your Message" rows="5" required></textarea>
+      <p id="form-error" class="error-msg"></p>
+      <button type="submit" class="btn">Send Message</button>
+      <p id="form-success" class="success-msg"></p>
+    </form>
+  </section>
+
+  <footer>
+    <p>Made by Kenna Getachew &mdash; 2026</p>
+    <div class="footer-links">
+      <a href="https://github.com/kennaget"   target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://www.linkedin.com/in/kenna-getachew-03aa902a9" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="mailto:kennaget04@gmail.com">Email</a>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
