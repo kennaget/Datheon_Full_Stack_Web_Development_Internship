@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopVibe – Find Everything</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">ShopVibe</span>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search for anything…" />
+        <button class="search-btn" onclick="handleSearch()">🔍</button>
+      </div>
+
+      <div class="nav-actions">
+        <button class="cart-btn" onclick="toggleCart()">
+          🛒 Cart
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="category-bar">
+      <button class="cat-btn active" data-cat="all" onclick="filterCategory(this,'all')">🏠 All</button>
+      <button class="cat-btn" data-cat="electronics" onclick="filterCategory(this,'electronics')">📱 Electronics</button>
+      <button class="cat-btn" data-cat="jewelery" onclick="filterCategory(this,'jewelery')">💎 Jewelry</button>
+      <button class="cat-btn" data-cat="men's clothing" onclick="filterCategory(this,`men's clothing`)">👔 Men's Clothing</button>
+      <button class="cat-btn" data-cat="women's clothing" onclick="filterCategory(this,`women's clothing`)">👗 Women's Clothing</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-sub">New arrivals every day</p>
+      <h1 class="hero-title">Shop Smarter,<br/><span>Live Better.</span></h1>
+      <p class="hero-desc">Discover millions of products at unbeatable prices.</p>
+      <button class="hero-cta" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop Now →</button>
+    </div>
+    <div class="hero-badges">
+      <div class="badge-card">🚚<br/><b>Free Shipping</b><br/><small>On orders over $20</small></div>
+      <div class="badge-card">🔒<br/><b>Secure Pay</b><br/><small>100% protected</small></div>
+      <div class="badge-card">↩️<br/><b>Easy Returns</b><br/><small>30-day guarantee</small></div>
+    </div>
+  </section>
+
+  <section id="products" class="products-section">
+    <div class="section-header">
+      <h2 id="sectionTitle">All Products</h2>
+      <div class="sort-bar">
+        <label>Sort by:</label>
+        <select id="sortSelect" onchange="sortProducts()">
+          <option value="default">Default</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="loadingSpinner" class="spinner-wrap">
+      <div class="spinner"></div>
+      <p>Loading products…</p>
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+  </section>
+
+  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>🛒 Your Cart</h3>
+      <button class="close-btn" onclick="toggleCart()">✕</button>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <div class="empty-cart">
+        <span>🛍️</span>
+        <p>Your cart is empty</p>
+      </div>
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-totals">
+        <div class="total-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+        <div class="total-row"><span>Tax (8%)</span><span id="taxAmount">$0.00</span></div>
+        <div class="total-row"><span>Shipping</span><span id="shippingAmount">$0.00</span></div>
+        <div class="total-row grand"><span>Total</span><span id="grandTotal">$0.00</span></div>
+      </div>
+      <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout →</button>
+    </div>
+  </aside>
+
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal">
+      <button class="close-btn modal-close" onclick="closeCheckout()">✕</button>
+      <div class="modal-icon">🎉</div>
+      <h2>Order Confirmed!</h2>
+      <p>Thank you for your purchase. Your order has been placed successfully.</p>
+      <div class="order-summary" id="orderSummary"></div>
+      <button class="checkout-btn" onclick="closeCheckout(); clearCart()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">⚡</span> <b>ShopVibe</b>
+        <p>Your daily shopping destination.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Help</h4>
+        <a href="#">FAQ</a>
+        <a href="#">Shipping Policy</a>
+        <a href="#">Returns</a>
+        <a href="#">Contact Us</a>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Press</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+    <p class="footer-copy">© 2026 ShopVibe. Built with ❤️ by a beginner coder.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

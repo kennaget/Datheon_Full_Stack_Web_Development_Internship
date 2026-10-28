@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App 🌤️</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+
+        <h1 class="app-title">🌍 Weather Forecast App</h1>
+        <p class="app-subtitle">Search any city in the world!</p>
+
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="cityInput" 
+                placeholder="Enter city name... e.g. London"
+                class="search-input"
+            />
+            <button onclick="getWeather()" class="search-btn">Search 🔍</button>
+        </div>
+
+        <div id="loadingSpinner" class="spinner hidden">
+            <div class="spinner-circle"></div>
+            <p>Loading weather data...</p>
+        </div>
+
+        <div id="errorMessage" class="error-box hidden">
+            <p>❌ City not found! Please check the spelling and try again.</p>
+        </div>
+
+        <div id="weatherCard" class="weather-card hidden">
+
+            <div class="city-info">
+                <h2 id="cityName">London</h2>
+                <p id="countryName">UK</p>
+            </div>
+
+            <div class="main-weather">
+                <div id="weatherIcon" class="weather-icon">☀️</div>
+                <div class="temperature-box">
+                    <span id="temperature" class="temperature">25°C</span>
+                    <span id="weatherDesc" class="weather-desc">Sunny</span>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-icon">💧</span>
+                    <span class="detail-label">Humidity</span>
+                    <span id="humidity" class="detail-value">60%</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-icon">💨</span>
+                    <span class="detail-label">Wind Speed</span>
+                    <span id="windSpeed" class="detail-value">12 km/h</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-icon">🌡️</span>
+                    <span class="detail-label">Pressure</span>
+                    <span id="pressure" class="detail-value">1013 hPa</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-icon">👁️</span>
+                    <span class="detail-label">Feels Like</span>
+                    <span id="feelsLike" class="detail-value">23°C</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="forecastSection" class="forecast-section hidden">
+            <h3 class="forecast-title">📅 5-Day Forecast</h3>
+            
+            <div id="forecastCards" class="forecast-cards"></div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
