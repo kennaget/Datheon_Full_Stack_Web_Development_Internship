@@ -266,7 +266,7 @@ section.gray-bg h2 {
   background-color: #fff;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.3s, border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  transition: background-color 0.3s, border-color 0.3s;
 }
 
 .project-card:hover {
@@ -304,20 +304,38 @@ section.gray-bg h2 {
   transition: background-color 0.3s, color 0.3s;
 }
 
-.clickable-card {
-  text-decoration: none;
-  color: inherit;
+/* Added styles for the Live Demo buttons */
+.project-links {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: auto;
 }
 
-.clickable-card:hover {
+.project-links a {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #0077cc;
+  color: #fff;
+  border-radius: 6px;
   text-decoration: none;
-  border-color: #0077cc;
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  font-size: 13px;
+  transition: background-color 0.3s;
 }
 
-.clickable-card h3 {
-  color: #0077cc;
+.project-links a:hover {
+  background-color: #005fa3;
+  text-decoration: none;
+}
+
+body.dark-mode .project-links a {
+  background-color: #4da3ff;
+  color: #121212;
+}
+
+body.dark-mode .project-links a:hover {
+  background-color: #3388dd;
 }
 
 #contact-form {
@@ -456,10 +474,6 @@ body.dark-mode .skill-card p {
 
 body.dark-mode .project-card h3 {
   color: #f0f0f0;
-}
-
-body.dark-mode .clickable-card h3 {
-  color: #4da3ff;
 }
 
 body.dark-mode .project-card p {
