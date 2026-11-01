@@ -1,158 +1,185 @@
 const API_KEY = "16ed7edbf9b5e7f9187208e9c65b761c";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
 
+const FORECAST_DAYS = 5;
+const NOON = "12:00:00";
+const KMH_PER_METER_PER_SECOND = 3.6;
+
+const RAINY_WEATHER = ["Rain", "Drizzle", "Thunderstorm", "Clouds"];
+const BACKGROUND_CLASSES = [
+    "sunny-background",
+    "rainy-background",
+    "night-background",
+    "snowy-background"
+];
+
+const cityInput = document.getElementById("cityInput");
+const loadingSpinner = document.getElementById("loadingSpinner");
+const errorMessage = document.getElementById("errorMessage");
+const weatherCard = document.getElementById("weatherCard");
+const forecastSection = document.getElementById("forecastSection");
+const forecastCards = document.getElementById("forecastCards");
+
+const cityNameText = document.getElementById("cityName");
+const countryNameText = document.getElementById("countryName");
+const weatherIcon = document.getElementById("weatherIcon");
+const temperatureText = document.getElementById("temperature");
+const weatherDescriptionText = document.getElementById("weatherDescription");
+const humidityText = document.getElementById("humidity");
+const windSpeedText = document.getElementById("windSpeed");
+const pressureText = document.getElementById("pressure");
+const feelsLikeText = document.getElementById("feelsLike");
+
+
 async function getWeather() {
+    const city = cityInput.value.trim();
 
-    const cityInput = document.getElementById("cityInput");
-    const cityName = cityInput.value.trim(); 
-
-    if (cityName === "") {
+    if (city === "") {
         alert("Please enter a city name!");
         return;
     }
 
-    hideElement("errorMessage");
-    hideElement("weatherCard");
-    hideElement("forecastSection");
-
-    showElement("loadingSpinner");
+    hideElement(errorMessage);
+    hideElement(weatherCard);
+    hideElement(forecastSection);
+    showElement(loadingSpinner);
 
     try {
-        const weatherData = await fetchCurrentWeather(cityName);
+        const currentWeather = await fetchCurrentWeather(city);
+        const forecast = await fetchForecast(city);
 
-        const forecastData = await fetchForecast(cityName);
-
-        hideElement("loadingSpinner");
-
-        displayCurrentWeather(weatherData);
-        displayForecast(forecastData);
+        hideElement(loadingSpinner);
+        showCurrentWeather(currentWeather);
+        showForecast(forecast);
 
         cityInput.value = "";
-
     } catch (error) {
         console.log("Error fetching weather:", error.message);
 
-        hideElement("loadingSpinner");
-        showElement("errorMessage");
+        hideElement(loadingSpinner);
+        showElement(errorMessage);
     }
 }
 
-async function fetchCurrentWeather(city) {
-    const url = `${BASE_URL}/weather?q=${city}&appid=${API_KEY}&units=metric`;
 
+function fetchCurrentWeather(city) {
+    return fetchJson("weather", city, "City not found");
+}
+
+function fetchForecast(city) {
+    return fetchJson("forecast", city, "Forecast not available");
+}
+
+async function fetchJson(endpoint, city, errorText) {
+    const url = `${BASE_URL}/${endpoint}?q=${city}&appid=${API_KEY}&units=metric`;
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error("City not found");
+        throw new Error(errorText);
     }
 
-    const data = await response.json();
-    return data;
+    return response.json();
 }
 
-async function fetchForecast(city) {
-    const url = `${BASE_URL}/forecast?q=${city}&appid=${API_KEY}&units=metric`;
 
-    const response = await fetch(url);
+function showCurrentWeather(data) {
+    const weatherType = data.weather[0].main;
+    const isNight = isNightTime(data);
 
-    if (!response.ok) {
-        throw new Error("Forecast not available");
+    cityNameText.textContent = data.name;
+    countryNameText.textContent = `📍 ${data.sys.country}`;
+    temperatureText.textContent = `${Math.round(data.main.temp)}°C`;
+    weatherDescriptionText.textContent = data.weather[0].description;
+    humidityText.textContent = `${data.main.humidity}%`;
+    windSpeedText.textContent = `${convertToKmh(data.wind.speed)} km/h`;
+    pressureText.textContent = `${data.main.pressure} hPa`;
+    feelsLikeText.textContent = `${Math.round(data.main.feels_like)}°C`;
+
+    weatherIcon.textContent = getWeatherEmoji(weatherType, isNight);
+    changeBackground(weatherType, isNight);
+
+    showElement(weatherCard);
+}
+
+function isNightTime(data) {
+    return data.dt > data.sys.sunset || data.dt < data.sys.sunrise;
+}
+
+function convertToKmh(metersPerSecond) {
+    return Math.round(metersPerSecond * KMH_PER_METER_PER_SECOND);
+}
+
+
+function showForecast(data) {
+    const dailyForecasts = pickDailyForecasts(data.list);
+
+    forecastCards.innerHTML = "";
+
+    for (const forecast of dailyForecasts) {
+        forecastCards.appendChild(createForecastCard(forecast));
     }
 
-    const data = await response.json();
-    return data;
+    showElement(forecastSection);
 }
 
-function displayCurrentWeather(data) {
-    const city        = data.name;
-    const country     = data.sys.country;
-    const temp        = Math.round(data.main.temp);
-    const feelsLike   = Math.round(data.main.feels_like);
-    const humidity    = data.main.humidity;
-    const windSpeed   = Math.round(data.wind.speed * 3.6);
-    const pressure    = data.main.pressure;
-    const description = data.weather[0].description;
-    const weatherMain = data.weather[0].main;
-    const isNight     = data.dt > data.sys.sunset || data.dt < data.sys.sunrise;
-
-    document.getElementById("cityName").textContent    = city;
-    document.getElementById("countryName").textContent = `📍 ${country}`;
-    document.getElementById("temperature").textContent  = `${temp}°C`;
-    document.getElementById("weatherDesc").textContent  = description;
-    document.getElementById("humidity").textContent     = `${humidity}%`;
-    document.getElementById("windSpeed").textContent    = `${windSpeed} km/h`;
-    document.getElementById("pressure").textContent    = `${pressure} hPa`;
-    document.getElementById("feelsLike").textContent   = `${feelsLike}°C`;
-
-    const icon = getWeatherEmoji(weatherMain, isNight);
-    document.getElementById("weatherIcon").textContent = icon;
-
-    changeBackground(weatherMain, isNight);
-
-    showElement("weatherCard");
-}
-
-function displayForecast(data) {
-    const forecastContainer = document.getElementById("forecastCards");
-
-    forecastContainer.innerHTML = "";
-
+function pickDailyForecasts(forecastList) {
     const dailyForecasts = [];
-    const seenDays = []; 
+    const seenDays = [];
 
-    for (let i = 0; i < data.list.length; i++) {
-        const item = data.list[i];
+    for (const item of forecastList) {
+        const day = getForecastDay(item);
+        const isNoon = item.dt_txt.includes(NOON);
 
-        const date = item.dt_txt.split(" ")[0];
-
-        if (!seenDays.includes(date) && item.dt_txt.includes("12:00:00")) {
-            seenDays.push(date);
+        if (!seenDays.includes(day) && isNoon) {
+            seenDays.push(day);
             dailyForecasts.push(item);
         }
 
-        if (dailyForecasts.length === 5) break;
+        if (dailyForecasts.length === FORECAST_DAYS) break;
     }
 
-    if (dailyForecasts.length < 5) {
-        for (let i = 0; i < data.list.length; i++) {
-            const item = data.list[i];
-            const date = item.dt_txt.split(" ")[0];
-            if (!seenDays.includes(date)) {
-                seenDays.push(date);
+    if (dailyForecasts.length < FORECAST_DAYS) {
+        for (const item of forecastList) {
+            const day = getForecastDay(item);
+
+            if (!seenDays.includes(day)) {
+                seenDays.push(day);
                 dailyForecasts.push(item);
             }
-            if (dailyForecasts.length === 5) break;
+
+            if (dailyForecasts.length === FORECAST_DAYS) break;
         }
     }
 
-    dailyForecasts.map(function(forecast) {
-        const dateObj = new Date(forecast.dt_txt);
-        const dayName = dateObj.toLocaleDateString("en-US", { weekday: "short" });
-
-        const temp     = Math.round(forecast.main.temp);
-        const tempMin  = Math.round(forecast.main.temp_min);
-        const tempMax  = Math.round(forecast.main.temp_max);
-        const weather  = forecast.weather[0].main;
-        const icon     = getWeatherEmoji(weather, false);
-
-        const card = document.createElement("div");
-        card.className = "forecast-card";
-
-        card.innerHTML = `
-            <span class="forecast-day">${dayName}</span>
-            <span class="forecast-icon">${icon}</span>
-            <span class="forecast-temp-high">↑ ${tempMax}°</span>
-            <span class="forecast-temp-low">↓ ${tempMin}°</span>
-        `;
-        
-        forecastContainer.appendChild(card);
-    });
-
-    showElement("forecastSection");
+    return dailyForecasts;
 }
 
-function getWeatherEmoji(weatherMain, isNight) {
-        switch (weatherMain) {
+function getForecastDay(forecastItem) {
+    return forecastItem.dt_txt.split(" ")[0];
+}
+
+function createForecastCard(forecast) {
+    const date = new Date(forecast.dt_txt);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    const highTemperature = Math.round(forecast.main.temp_max);
+    const lowTemperature = Math.round(forecast.main.temp_min);
+    const icon = getWeatherEmoji(forecast.weather[0].main, false);
+
+    const card = document.createElement("div");
+    card.className = "forecast-card";
+    card.innerHTML = `
+        <span class="forecast-day">${dayName}</span>
+        <span class="forecast-icon">${icon}</span>
+        <span class="forecast-high">↑ ${highTemperature}°</span>
+        <span class="forecast-low">↓ ${lowTemperature}°</span>
+    `;
+
+    return card;
+}
+
+
+function getWeatherEmoji(weatherType, isNight) {
+    switch (weatherType) {
         case "Clear":
             return isNight ? "🌙" : "☀️";
         case "Clouds":
@@ -172,34 +199,36 @@ function getWeatherEmoji(weatherMain, isNight) {
         case "Tornado":
             return "🌪️";
         default:
-            return "🌤️";  
-            }
-}
-
-function changeBackground(weatherMain, isNight) {
-    document.body.classList.remove("sunny-bg", "rainy-bg", "night-bg", "snowy-bg");
-
-    if (isNight) {
-        document.body.classList.add("night-bg");
-    } else if (weatherMain === "Clear") {
-        document.body.classList.add("sunny-bg");
-    } else if (weatherMain === "Rain" || weatherMain === "Drizzle" || weatherMain === "Thunderstorm" || weatherMain === "Clouds") {
-        document.body.classList.add("rainy-bg");
-    } else if (weatherMain === "Snow") {
-        document.body.classList.add("snowy-bg");
+            return "🌤️";
     }
 }
 
-function showElement(elementId) {
-    document.getElementById(elementId).classList.remove("hidden");
+function changeBackground(weatherType, isNight) {
+    document.body.classList.remove(...BACKGROUND_CLASSES);
+
+    if (isNight) {
+        document.body.classList.add("night-background");
+    } else if (weatherType === "Clear") {
+        document.body.classList.add("sunny-background");
+    } else if (RAINY_WEATHER.includes(weatherType)) {
+        document.body.classList.add("rainy-background");
+    } else if (weatherType === "Snow") {
+        document.body.classList.add("snowy-background");
+    }
 }
 
-function hideElement(elementId) {
-    document.getElementById(elementId).classList.add("hidden");
+
+function showElement(element) {
+    element.classList.remove("hidden");
 }
 
-document.getElementById("cityInput").addEventListener("keypress", function(event) {
+function hideElement(element) {
+    element.classList.add("hidden");
+}
+
+
+cityInput.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
-        getWeather(); 
+        getWeather();
     }
 });

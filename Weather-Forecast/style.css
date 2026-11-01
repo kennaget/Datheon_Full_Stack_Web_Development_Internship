@@ -1,3 +1,11 @@
+:root {
+    --glass-background: rgba(255, 255, 255, 0.18);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --soft-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    --tile-background: rgba(255, 255, 255, 0.15);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -8,29 +16,29 @@ body {
     font-family: 'Segoe UI', Arial, sans-serif;
     min-height: 100vh;
     background: linear-gradient(135deg, #74b9ff, #0984e3);
-    transition: background 0.8s ease; 
+    transition: background 0.8s ease;
     padding: 20px;
 }
 
-body.sunny-bg {
+body.sunny-background {
     background: linear-gradient(135deg, #fdcb6e, #e17055, #f39c12);
 }
 
-body.rainy-bg {
+body.rainy-background {
     background: linear-gradient(135deg, #636e72, #2d3436, #74b9ff);
 }
 
-body.night-bg {
+body.night-background {
     background: linear-gradient(135deg, #2c3e50, #3d5a80, #1a1a2e);
 }
 
-body.snowy-bg {
+body.snowy-background {
     background: linear-gradient(135deg, #dfe6e9, #b2bec3, #74b9ff);
 }
 
 .container {
-    max-width: 650px;          
-    margin: 0 auto;            
+    max-width: 650px;
+    margin: 0 auto;
     padding: 20px;
 }
 
@@ -39,7 +47,7 @@ body.snowy-bg {
     color: white;
     font-size: 2rem;
     margin-bottom: 5px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .app-subtitle {
@@ -51,18 +59,18 @@ body.snowy-bg {
 
 .search-box {
     display: flex;
-    gap: 10px;                 
+    gap: 10px;
     margin-bottom: 25px;
 }
 
 .search-input {
-    flex: 1;                   
+    flex: 1;
     padding: 14px 18px;
     border: none;
-    border-radius: 50px;       
+    border-radius: 50px;
     font-size: 1rem;
     outline: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: var(--soft-shadow);
     background: rgba(255, 255, 255, 0.95);
     color: #333;
 }
@@ -71,7 +79,7 @@ body.snowy-bg {
     color: #aaa;
 }
 
-.search-btn {
+.search-button {
     padding: 14px 22px;
     border: none;
     border-radius: 50px;
@@ -79,39 +87,44 @@ body.snowy-bg {
     color: white;
     font-size: 1rem;
     font-weight: bold;
-    cursor: pointer;          
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    cursor: pointer;
+    box-shadow: var(--soft-shadow);
     transition: background 0.3s;
     backdrop-filter: blur(5px);
     white-space: nowrap;
 }
 
-.search-btn:hover {
+.search-button:hover {
     background: rgba(255, 255, 255, 0.4);
 }
 
-.spinner {
+.loading {
     text-align: center;
     color: white;
     margin: 20px 0;
 }
 
-.spinner-circle {
+.spinner {
     width: 50px;
     height: 50px;
-    border: 5px solid rgba(255,255,255,0.3);
-    border-top: 5px solid white;  
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-top: 5px solid white;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 10px;
 }
 
 @keyframes spin {
-    0%   { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.error-box {
+.error-message {
     background: rgba(214, 48, 49, 0.85);
     color: white;
     padding: 15px 20px;
@@ -119,17 +132,21 @@ body.snowy-bg {
     text-align: center;
     margin-bottom: 20px;
     font-size: 1rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: var(--soft-shadow);
+}
+
+.weather-card,
+.forecast-section {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: var(--glass-border);
+    border-radius: 20px;
+    color: white;
+    box-shadow: var(--glass-shadow);
 }
 
 .weather-card {
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);       
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 20px;
     padding: 30px;
-    color: white;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
     margin-bottom: 20px;
     text-align: center;
 }
@@ -156,7 +173,7 @@ body.snowy-bg {
 
 .weather-icon {
     font-size: 5rem;
-    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .temperature-box {
@@ -171,22 +188,22 @@ body.snowy-bg {
     line-height: 1;
 }
 
-.weather-desc {
+.weather-description {
     font-size: 1.2rem;
     opacity: 0.9;
-    text-transform: capitalize; 
+    text-transform: capitalize;
     margin-top: 5px;
 }
 
-.details-grid {
+.weather-details {
     display: flex;
-    flex-wrap: wrap;            
+    flex-wrap: wrap;
     gap: 12px;
     justify-content: center;
 }
 
 .detail-item {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--tile-background);
     border-radius: 12px;
     padding: 14px 18px;
     display: flex;
@@ -194,7 +211,7 @@ body.snowy-bg {
     align-items: center;
     gap: 4px;
     min-width: 120px;
-    flex: 1;                   
+    flex: 1;
     max-width: 140px;
 }
 
@@ -215,13 +232,7 @@ body.snowy-bg {
 }
 
 .forecast-section {
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 20px;
     padding: 25px;
-    color: white;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
 }
 
 .forecast-title {
@@ -235,11 +246,11 @@ body.snowy-bg {
     display: flex;
     gap: 10px;
     justify-content: space-between;
-    flex-wrap: wrap;            
+    flex-wrap: wrap;
 }
 
 .forecast-card {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--tile-background);
     border-radius: 12px;
     padding: 14px 10px;
     text-align: center;
@@ -262,12 +273,12 @@ body.snowy-bg {
     font-size: 1.8rem;
 }
 
-.forecast-temp-high {
+.forecast-high {
     font-size: 1rem;
     font-weight: bold;
 }
 
-.forecast-temp-low {
+.forecast-low {
     font-size: 0.8rem;
     opacity: 0.75;
 }
@@ -282,15 +293,11 @@ body.snowy-bg {
     }
 
     .search-box {
-        flex-direction: column;  
-    }
-
-    .search-btn {
-        border-radius: 50px;
+        flex-direction: column;
     }
 
     .main-weather {
-        flex-direction: column;  
+        flex-direction: column;
     }
 
     .temperature {
@@ -301,7 +308,7 @@ body.snowy-bg {
         font-size: 4rem;
     }
 
-    .details-grid {
+    .weather-details {
         gap: 8px;
     }
 
