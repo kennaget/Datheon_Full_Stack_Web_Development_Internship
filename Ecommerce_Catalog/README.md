@@ -2,8 +2,7 @@
 
 A responsive e-commerce storefront built with **plain HTML, CSS and JavaScript**. It loads products from a public API and lets you search, filter, sort, and manage a shopping cart through to a checkout confirmation, with no frameworks and no build step.
 
-> 🔗 **Live demo:** `<add your GitHub Pages / Netlify / Vercel link here>`
-> 📸 **Screenshot:** `<add a screenshot or GIF here, e.g. ![ShopVibe](./screenshot.png)>`
+> 🔗 **Live demo:** `https://ecommerceapp-five-roan.vercel.app`
 
 ---
 
@@ -22,12 +21,12 @@ A responsive e-commerce storefront built with **plain HTML, CSS and JavaScript**
 
 ## 🛠️ Tech Stack
 
-| Layer   | Technology                                                  |
-| ------- | ----------------------------------------------------------- |
-| Markup  | HTML5                                                       |
-| Styling | CSS3 (custom properties, Grid, Flexbox, animations)         |
-| Logic   | Vanilla JavaScript (`async/await`, Fetch API)               |
-| Data    | [Fake Store API](https://fakestoreapi.com/products)         |
+| Layer   | Technology                                                            |
+| ------- | --------------------------------------------------------------------- |
+| Markup  | HTML5                                                                 |
+| Styling | CSS3 (custom properties, Grid, Flexbox, animations)                   |
+| Logic   | Vanilla JavaScript (`async/await`, Fetch API)                         |
+| Data    | [Fake Store API](https://fakestoreapi.com/products)                   |
 | Fonts   | [Poppins](https://fonts.google.com/specimen/Poppins) via Google Fonts |
 
 ## 🚀 Getting Started
@@ -35,7 +34,7 @@ A responsive e-commerce storefront built with **plain HTML, CSS and JavaScript**
 No installation or build tools are needed.
 
 ```bash
-git clone https://github.com/<your-username>/shopvibe.git
+git clone https://github.com/kennaget/shopvibe.git
 cd shopvibe
 ```
 
@@ -60,16 +59,16 @@ shopvibe/
 
 ### `app.js`, from top to bottom
 
-| Part                    | Functions                                                                                     | What it does                                              |
-| ----------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Settings and data       | `API_URL`, `TAX_RATE`, `allProducts`, `currentCategory`, `cart`                               | The values the app remembers                              |
-| Page elements           | `searchInput`, `productGrid`, `cartDrawer`, …                                                 | Finds each HTML element once, so the rest of the code can reuse it |
-| Loading products        | `loadProducts`, `showLoadError`                                                               | Fetches the data and handles failure                      |
-| Showing products        | `showProducts`, `getVisibleProducts`, `sortProductList`, `createProductCardHtml`              | Filters, sorts and draws the product cards                |
-| Cart data               | `addToCart`, `updateQuantity`, `removeFromCart`, `clearCart`, `calculateTotals`               | Changes the cart and does the maths                       |
-| Cart display            | `updateCart`, `showCartItems`, `showCartTotals`, `updateAddButtons`                           | Redraws the cart drawer                                   |
-| Buttons and clicks      | `handleSearch`, `filterCategory`, `toggleCart`, `openCheckout`, `closeCheckout`, …            | Functions the HTML buttons call                           |
-| Small helpers           | `formatPrice`, `escapeHtml`, `lockPageScroll`                                                 | Tiny tools used in many places                            |
+| Part               | Functions                                                                          | What it does                                                       |
+| ------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Settings and data  | `API_URL`, `TAX_RATE`, `allProducts`, `currentCategory`, `cart`                    | The values the app remembers                                       |
+| Page elements      | `searchInput`, `productGrid`, `cartDrawer`, …                                      | Finds each HTML element once, so the rest of the code can reuse it |
+| Loading products   | `loadProducts`, `showLoadError`                                                    | Fetches the data and handles failure                               |
+| Showing products   | `showProducts`, `getVisibleProducts`, `sortProductList`, `createProductCardHtml`   | Filters, sorts and draws the product cards                         |
+| Cart data          | `addToCart`, `updateQuantity`, `removeFromCart`, `clearCart`, `calculateTotals`    | Changes the cart and does the maths                                |
+| Cart display       | `updateCart`, `showCartItems`, `showCartTotals`, `updateAddButtons`                | Redraws the cart drawer                                            |
+| Buttons and clicks | `handleSearch`, `filterCategory`, `toggleCart`, `openCheckout`, `closeCheckout`, … | Functions the HTML buttons call                                    |
+| Small helpers      | `formatPrice`, `escapeHtml`, `lockPageScroll`                                      | Tiny tools used in many places                                     |
 
 ### Naming rules used across all three files
 
@@ -124,8 +123,6 @@ I used AI (Claude) as a helper on this project. I want to be clear about where, 
 
 **How I checked it:** the page was run in a real browser with the old and new versions side by side. Every click path (search, filters, sorting, cart, checkout, API failure and retry) produced the same results and the same screenshots.
 
-**What I did after:** `<fill in, e.g. read every function, traced a click from button to screen, changed X myself>`
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -134,17 +131,13 @@ I used AI (Claude) as a helper on this project. I want to be clear about where, 
 4. Push the branch: `git push origin feature/my-feature`
 5. Open a Pull Request
 
-## 📄 License
-
-[MIT](LICENSE). Add a `LICENSE` file to the repository to match.
-
 ## 👤 Author
 
 **Kenna Getachew**: Computer Science student and full-stack web developer
 
-- GitHub: `<your GitHub profile link>`
-- LinkedIn: `<your LinkedIn link>`
+- GitHub: `https://github.com/kennaget`
+- LinkedIn: `https://www.linkedin.com/in/kenna-getachew-03aa902a9`
 
 ---
 
-*Product data and images come from the Fake Store API and are used for demonstration only.*
+_Product data and images come from the Fake Store API and are used for demonstration only._
