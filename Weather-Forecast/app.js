@@ -14,7 +14,6 @@ const BACKGROUND_CLASSES = [
     "snowy-background"
 ];
 
-// Common misspellings dictionary
 const CITY_MISSPELLINGS = {
     "mokadisho": "Mogadishu",
     "mogadisho": "Mogadishu",
@@ -58,7 +57,6 @@ async function getWeather() {
         return;
     }
 
-    // Check if the user typed a known misspelling and fix it
     const lowerCity = city.toLowerCase();
     if (CITY_MISSPELLINGS[lowerCity]) {
         city = CITY_MISSPELLINGS[lowerCity];
@@ -71,20 +69,17 @@ async function getWeather() {
     showElement(loadingSpinner);
 
     try {
-        // 1. Get coordinates for the typed location (city or street)
         const geoData = await fetchLocationCoordinates(city);
         
         if (geoData.length === 0) {
             throw new Error("Location not found");
         }
 
-        // Use the first result's coordinates
         const lat = geoData[0].lat;
         const lon = geoData[0].lon;
         const displayName = geoData[0].name;
         const displayCountry = geoData[0].country;
 
-        // 2. Fetch weather using coordinates (most accurate)
         const currentWeather = await fetchCurrentWeatherByCoords(lat, lon, displayName, displayCountry);
         const forecast = await fetchForecastByCoords(lat, lon);
 
@@ -102,7 +97,6 @@ async function getWeather() {
 }
 
 
-// Fetch coordinates for any location (city, street, etc.)
 async function fetchLocationCoordinates(query) {
     const url = `${GEO_URL}?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
     const response = await fetch(url);
@@ -110,7 +104,6 @@ async function fetchLocationCoordinates(query) {
     return response.json();
 }
 
-// Fetch current weather using Lat/Lon
 async function fetchCurrentWeatherByCoords(lat, lon, name, country) {
     const url = `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
     const response = await fetch(url);
@@ -120,14 +113,13 @@ async function fetchCurrentWeatherByCoords(lat, lon, name, country) {
     }
 
     const data = await response.json();
-    // Override the name and country with the exact searched location
+ 
     data.name = name;
     if (country) data.sys.country = country;
     
     return data;
 }
 
-// Fetch forecast using Lat/Lon
 async function fetchForecastByCoords(lat, lon) {
     const url = `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
     const response = await fetch(url);
@@ -275,7 +267,6 @@ function changeBackground(weatherType, isNight) {
     }
 }
 
-
 function showElement(element) {
     element.classList.remove("hidden");
 }
@@ -285,10 +276,7 @@ function hideElement(element) {
 }
 
 
-/* --- Autocomplete Suggestions Logic for Cities & Streets --- */
-
 async function fetchCitySuggestions(query) {
-    // Check if the query exactly matches a known misspelling
     const lowerQuery = query.toLowerCase();
     let finalQuery = query;
 
@@ -322,7 +310,6 @@ function displaySuggestions(locations) {
         const item = document.createElement("div");
         item.className = "suggestion-item";
         
-        // Build the display text: Street/City Name, State (if available), Country
         const name = loc.name;
         const state = loc.state ? `, ${loc.state}` : "";
         const country = loc.country;
@@ -333,11 +320,9 @@ function displaySuggestions(locations) {
         `;
 
         item.addEventListener("click", function () {
-            // Fill the input with the name and country so it's clear what was selected
             cityInput.value = `${name}${state}, ${country}`;
             hideElement(suggestionsBox);
             
-            // Immediately fetch weather for this specific location using its coordinates
             getWeatherForLocation(loc);
         });
 
@@ -347,7 +332,6 @@ function displaySuggestions(locations) {
     showElement(suggestionsBox);
 }
 
-// A direct fetch function when clicking a suggestion
 async function getWeatherForLocation(loc) {
     hideElement(suggestionsBox);
     hideElement(errorMessage);
@@ -394,7 +378,6 @@ cityInput.addEventListener("keydown", function (event) {
     }
 });
 
-/* Close suggestions if clicking outside */
 document.addEventListener("click", function (event) {
     if (!event.target.closest(".search-input-wrapper")) {
         hideElement(suggestionsBox);
