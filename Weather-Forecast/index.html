@@ -14,12 +14,16 @@
         <p class="app-subtitle">Search any city in the world!</p>
 
         <div class="search-box">
-            <input
-                type="text"
-                id="cityInput"
-                class="search-input"
-                placeholder="Enter city name... e.g. London"
-            />
+            <div class="search-input-wrapper">
+                <input
+                    type="text"
+                    id="cityInput"
+                    class="search-input"
+                    placeholder="Enter city name... e.g. London"
+                    autocomplete="off"
+                />
+                <div id="suggestionsBox" class="suggestions-box hidden"></div>
+            </div>
             <button class="search-button" onclick="getWeather()">Search 🔍</button>
         </div>
 

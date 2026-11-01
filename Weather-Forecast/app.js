@@ -1,5 +1,6 @@
 const API_KEY = "16ed7edbf9b5e7f9187208e9c65b761c";
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
+const GEO_URL = "https://api.openweathermap.org/geo/1.0/direct";
 
 const FORECAST_DAYS = 5;
 const NOON = "12:00:00";
@@ -13,7 +14,23 @@ const BACKGROUND_CLASSES = [
     "snowy-background"
 ];
 
+// Common misspellings dictionary
+const CITY_MISSPELLINGS = {
+    "mokadisho": "Mogadishu",
+    "mogadisho": "Mogadishu",
+    "addis abeba": "Addis Ababa",
+    "addis": "Addis Ababa",
+    "nairobi": "Nairobi",
+    "london": "London",
+    "paris": "Paris",
+    "new york": "New York",
+    "tokyo": "Tokyo",
+    "dubai": "Dubai",
+    "cairo": "Cairo"
+};
+
 const cityInput = document.getElementById("cityInput");
+const suggestionsBox = document.getElementById("suggestionsBox");
 const loadingSpinner = document.getElementById("loadingSpinner");
 const errorMessage = document.getElementById("errorMessage");
 const weatherCard = document.getElementById("weatherCard");
@@ -30,23 +47,46 @@ const windSpeedText = document.getElementById("windSpeed");
 const pressureText = document.getElementById("pressure");
 const feelsLikeText = document.getElementById("feelsLike");
 
+let searchTimeout;
+
 
 async function getWeather() {
-    const city = cityInput.value.trim();
+    let city = cityInput.value.trim();
 
     if (city === "") {
-        alert("Please enter a city name!");
+        alert("Please enter a city or street name!");
         return;
     }
 
+    // Check if the user typed a known misspelling and fix it
+    const lowerCity = city.toLowerCase();
+    if (CITY_MISSPELLINGS[lowerCity]) {
+        city = CITY_MISSPELLINGS[lowerCity];
+    }
+
+    hideElement(suggestionsBox);
     hideElement(errorMessage);
     hideElement(weatherCard);
     hideElement(forecastSection);
     showElement(loadingSpinner);
 
     try {
-        const currentWeather = await fetchCurrentWeather(city);
-        const forecast = await fetchForecast(city);
+        // 1. Get coordinates for the typed location (city or street)
+        const geoData = await fetchLocationCoordinates(city);
+        
+        if (geoData.length === 0) {
+            throw new Error("Location not found");
+        }
+
+        // Use the first result's coordinates
+        const lat = geoData[0].lat;
+        const lon = geoData[0].lon;
+        const displayName = geoData[0].name;
+        const displayCountry = geoData[0].country;
+
+        // 2. Fetch weather using coordinates (most accurate)
+        const currentWeather = await fetchCurrentWeatherByCoords(lat, lon, displayName, displayCountry);
+        const forecast = await fetchForecastByCoords(lat, lon);
 
         hideElement(loadingSpinner);
         showCurrentWeather(currentWeather);
@@ -62,20 +102,38 @@ async function getWeather() {
 }
 
 
-function fetchCurrentWeather(city) {
-    return fetchJson("weather", city, "City not found");
+// Fetch coordinates for any location (city, street, etc.)
+async function fetchLocationCoordinates(query) {
+    const url = `${GEO_URL}?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`;
+    const response = await fetch(url);
+    if (!response.ok) return [];
+    return response.json();
 }
 
-function fetchForecast(city) {
-    return fetchJson("forecast", city, "Forecast not available");
-}
-
-async function fetchJson(endpoint, city, errorText) {
-    const url = `${BASE_URL}/${endpoint}?q=${city}&appid=${API_KEY}&units=metric`;
+// Fetch current weather using Lat/Lon
+async function fetchCurrentWeatherByCoords(lat, lon, name, country) {
+    const url = `${BASE_URL}/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
     const response = await fetch(url);
 
     if (!response.ok) {
-        throw new Error(errorText);
+        throw new Error("Weather data not available");
+    }
+
+    const data = await response.json();
+    // Override the name and country with the exact searched location
+    data.name = name;
+    if (country) data.sys.country = country;
+    
+    return data;
+}
+
+// Fetch forecast using Lat/Lon
+async function fetchForecastByCoords(lat, lon) {
+    const url = `${BASE_URL}/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("Forecast not available");
     }
 
     return response.json();
@@ -227,8 +285,118 @@ function hideElement(element) {
 }
 
 
+/* --- Autocomplete Suggestions Logic for Cities & Streets --- */
+
+async function fetchCitySuggestions(query) {
+    // Check if the query exactly matches a known misspelling
+    const lowerQuery = query.toLowerCase();
+    let finalQuery = query;
+
+    if (CITY_MISSPELLINGS[lowerQuery]) {
+        finalQuery = CITY_MISSPELLINGS[lowerQuery];
+    }
+
+    try {
+        const url = `${GEO_URL}?q=${encodeURIComponent(finalQuery)}&limit=5&appid=${API_KEY}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) return [];
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.log("Error fetching suggestions:", error);
+        return [];
+    }
+}
+
+function displaySuggestions(locations) {
+    suggestionsBox.innerHTML = "";
+
+    if (locations.length === 0) {
+        hideElement(suggestionsBox);
+        return;
+    }
+
+    for (const loc of locations) {
+        const item = document.createElement("div");
+        item.className = "suggestion-item";
+        
+        // Build the display text: Street/City Name, State (if available), Country
+        const name = loc.name;
+        const state = loc.state ? `, ${loc.state}` : "";
+        const country = loc.country;
+
+        item.innerHTML = `
+            <span><strong>${name}</strong>${state}</span>
+            <span class="suggestion-country">${country}</span>
+        `;
+
+        item.addEventListener("click", function () {
+            // Fill the input with the name and country so it's clear what was selected
+            cityInput.value = `${name}${state}, ${country}`;
+            hideElement(suggestionsBox);
+            
+            // Immediately fetch weather for this specific location using its coordinates
+            getWeatherForLocation(loc);
+        });
+
+        suggestionsBox.appendChild(item);
+    }
+
+    showElement(suggestionsBox);
+}
+
+// A direct fetch function when clicking a suggestion
+async function getWeatherForLocation(loc) {
+    hideElement(suggestionsBox);
+    hideElement(errorMessage);
+    hideElement(weatherCard);
+    hideElement(forecastSection);
+    showElement(loadingSpinner);
+
+    try {
+        const currentWeather = await fetchCurrentWeatherByCoords(loc.lat, loc.lon, loc.name, loc.country);
+        const forecast = await fetchForecastByCoords(loc.lat, loc.lon);
+
+        hideElement(loadingSpinner);
+        showCurrentWeather(currentWeather);
+        showForecast(forecast);
+
+        cityInput.value = "";
+    } catch (error) {
+        console.log("Error fetching weather:", error.message);
+        hideElement(loadingSpinner);
+        showElement(errorMessage);
+    }
+}
+
+
+cityInput.addEventListener("input", function () {
+    clearTimeout(searchTimeout);
+    const query = cityInput.value.trim();
+
+    if (query.length < 2) {
+        hideElement(suggestionsBox);
+        return;
+    }
+
+    searchTimeout = setTimeout(async function () {
+        const locations = await fetchCitySuggestions(query);
+        displaySuggestions(locations);
+    }, 300);
+});
+
 cityInput.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
+        hideElement(suggestionsBox);
         getWeather();
+    }
+});
+
+/* Close suggestions if clicking outside */
+document.addEventListener("click", function (event) {
+    if (!event.target.closest(".search-input-wrapper")) {
+        hideElement(suggestionsBox);
     }
 });
