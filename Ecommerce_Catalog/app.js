@@ -1,253 +1,443 @@
-let allProducts    = [];   
-let filteredProducts = []; 
-let cart           = {};   
+const API_URL = 'https://fakestoreapi.com/products';
+const TAX_RATE = 0.08;
+const FREE_SHIPPING_MINIMUM = 20;
+const SHIPPING_COST = 4.99;
 
-const TAX_RATE      = 0.08;
-const FREE_SHIPPING = 20;
+let allProducts = [];
+let currentCategory = 'all';
+let cart = {};
 
-const $ = id => document.getElementById(id);
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+const sectionTitle = document.getElementById('sectionTitle');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const productGrid = document.getElementById('productGrid');
 
-async function fetchProducts() {
+const cartBadge = document.getElementById('cartBadge');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartOverlay = document.getElementById('cartOverlay');
+const cartItemsList = document.getElementById('cartItemsList');
+const subtotalText = document.getElementById('subtotalAmount');
+const taxText = document.getElementById('taxAmount');
+const shippingText = document.getElementById('shippingAmount');
+const totalText = document.getElementById('totalAmount');
+
+const checkoutModal = document.getElementById('checkoutModal');
+const orderSummary = document.getElementById('orderSummary');
+
+
+async function loadProducts() {
+  loadingSpinner.style.display = 'block';
+  productGrid.innerHTML = '';
+
   try {
-    const res  = await fetch('https://fakestoreapi.com/products');
-    const data = await res.json();
-    allProducts      = data;
-    filteredProducts = [...data];
-    $('loadingSpinner').style.display = 'none';
-    renderProducts(filteredProducts);
-  } catch (err) {
-    $('loadingSpinner').innerHTML =
-      '<p style="color:#ef4444">⚠️ Failed to load products. Please refresh.</p>';
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error('Server responded with ' + response.status);
+    }
+
+    allProducts = await response.json();
+    loadingSpinner.style.display = 'none';
+    showProducts();
+  } catch (error) {
+    console.error('Failed to load products:', error);
+    loadingSpinner.style.display = 'none';
+    showLoadError();
   }
 }
 
-function renderProducts(products) {
-  const grid = $('productGrid');
-  grid.innerHTML = '';
 
-  if (!products.length) {
-    grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">
-        <span style="font-size:3rem">🔍</span>
-        <p style="margin-top:12px;font-size:1.05rem">No products found. Try a different search.</p>
+function showProducts() {
+  const products = getVisibleProducts();
+
+  if (products.length === 0) {
+    productGrid.innerHTML = `
+      <div class="state-message">
+        <span class="state-icon">🔍</span>
+        <p>No products found. Try a different search.</p>
       </div>`;
     return;
   }
 
-  products.forEach(p => {
-    const stars  = renderStars(p.rating.rate);
-    const badge  = getBadge(p);
-    const inCart = cart[p.id];
+  let html = '';
+  for (const product of products) {
+    html += createProductCardHtml(product);
+  }
+  productGrid.innerHTML = html;
+}
 
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      ${badge ? `<span class="card-badge ${badge.cls}">${badge.label}</span>` : ''}
-      <div class="card-img-wrap">
-        <img src="${p.image}" alt="${p.title}" loading="lazy" />
+function showLoadError() {
+  productGrid.innerHTML = `
+    <div class="state-message">
+      <span class="state-icon">⚠️</span>
+      <p>We couldn't load the products. Check your connection and try again.</p>
+      <button class="retry-button" onclick="loadProducts()">Try again</button>
+    </div>`;
+}
+
+function getVisibleProducts() {
+  const searchText = searchInput.value.toLowerCase().trim();
+  const products = [];
+
+  for (const product of allProducts) {
+    const isInCategory = currentCategory === 'all' || product.category === currentCategory;
+
+    const titleMatches = product.title.toLowerCase().includes(searchText);
+    const descriptionMatches = product.description.toLowerCase().includes(searchText);
+    const matchesSearch = searchText === '' || titleMatches || descriptionMatches;
+
+    if (isInCategory && matchesSearch) {
+      products.push(product);
+    }
+  }
+
+  sortProductList(products);
+  return products;
+}
+
+function sortProductList(products) {
+  const sortMode = sortSelect.value;
+
+  if (sortMode === 'price-asc') {
+    products.sort(function (a, b) { return a.price - b.price; });
+  }
+  if (sortMode === 'price-desc') {
+    products.sort(function (a, b) { return b.price - a.price; });
+  }
+  if (sortMode === 'rating') {
+    products.sort(function (a, b) { return b.rating.rate - a.rating.rate; });
+  }
+}
+
+function createProductCardHtml(product) {
+  const title = escapeHtml(product.title);
+  const category = escapeHtml(product.category);
+  const stars = getStarsText(product.rating.rate);
+  const buttonSymbol = isInCart(product.id) ? '✓' : '+';
+
+  return `
+    <div class="product-card">
+      ${getBadgeHtml(product)}
+      <div class="product-image">
+        <img src="${product.image}" alt="${title}" loading="lazy" />
       </div>
-      <div class="card-body">
-        <span class="card-category">${p.category}</span>
-        <p class="card-title">${p.title}</p>
-        <div class="card-stars">
-          <span class="stars">${stars}</span>
-          <span class="rating-count">(${p.rating.count})</span>
+      <div class="product-info">
+        <span class="product-category">${category}</span>
+        <p class="product-title">${title}</p>
+        <div class="product-rating">
+          <span class="rating-stars">${stars}</span>
+          <span class="rating-count">(${product.rating.count})</span>
         </div>
-        <div class="card-footer">
-          <span class="card-price">$${p.price.toFixed(2)}</span>
-          <button class="add-btn" onclick="addToCart(${p.id})" title="Add to cart">
-            ${inCart ? '✓' : '+'}
+        <div class="product-footer">
+          <span class="product-price">${formatPrice(product.price)}</span>
+          <button class="add-to-cart-button" data-id="${product.id}" onclick="addToCart(${product.id})" title="Add to cart">
+            ${buttonSymbol}
           </button>
         </div>
-      </div>`;
-    grid.appendChild(card);
-  });
+      </div>
+    </div>`;
 }
 
-function renderStars(rate) {
-  const full  = Math.floor(rate);
-  const half  = rate % 1 >= 0.5 ? 1 : 0;
-  const empty = 5 - full - half;
-  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+function getBadgeHtml(product) {
+  if (product.rating.rate >= 4.5) {
+    return '<span class="product-badge top-rated">⭐ Top Rated</span>';
+  }
+  if (product.price < 15) {
+    return '<span class="product-badge">🔥 Hot Deal</span>';
+  }
+  return '';
 }
 
-function getBadge(p) {
-  if (p.rating.rate >= 4.5) return { label: '⭐ Top Rated', cls: 'top' };
-  if (p.price < 15)         return { label: '🔥 Hot Deal',  cls: ''    };
+function getStarsText(rating) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  let emptyStars = 5 - fullStars;
+
+  let stars = '★'.repeat(fullStars);
+  if (hasHalfStar) {
+    stars += '½';
+    emptyStars = emptyStars - 1;
+  }
+  stars += '☆'.repeat(emptyStars);
+
+  return stars;
+}
+
+
+function findProduct(id) {
+  for (const product of allProducts) {
+    if (product.id === id) {
+      return product;
+    }
+  }
   return null;
 }
 
-function filterCategory(btn, cat) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  const search = $('searchInput').value.toLowerCase();
-  let base = cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat);
-  filteredProducts = base.filter(p => p.title.toLowerCase().includes(search));
-
-  $('sectionTitle').textContent = cat === 'all' ? 'All Products'
-    : cat.charAt(0).toUpperCase() + cat.slice(1);
-
-  sortProducts();
+function isInCart(id) {
+  return cart[id] !== undefined;
 }
 
-function handleSearch() {
-  const query   = $('searchInput').value.toLowerCase().trim();
-  const activeBtn = document.querySelector('.cat-btn.active');
-  const cat     = activeBtn?.dataset.cat || 'all';
-
-  let base = cat === 'all' ? allProducts : allProducts.filter(p => p.category === cat);
-  filteredProducts = query
-    ? base.filter(p => p.title.toLowerCase().includes(query) || p.description.toLowerCase().includes(query))
-    : base;
-
-  sortProducts();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  $('searchInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleSearch();
-  });
-  fetchProducts();
-});
-
-function sortProducts() {
-  const mode = $('sortSelect').value;
-  const copy = [...filteredProducts];
-
-  if (mode === 'price-asc')  copy.sort((a,b) => a.price - b.price);
-  if (mode === 'price-desc') copy.sort((a,b) => b.price - a.price);
-  if (mode === 'rating')     copy.sort((a,b) => b.rating.rate - a.rating.rate);
-
-  renderProducts(copy);
+function getCartItems() {
+  const items = [];
+  for (const id in cart) {
+    items.push(cart[id]);
+  }
+  return items;
 }
 
 function addToCart(id) {
-  const product = allProducts.find(p => p.id === id);
-  if (!product) return;
-
-  if (cart[id]) {
-    cart[id].qty += 1;
+  if (isInCart(id)) {
+    cart[id].quantity += 1;
   } else {
-    cart[id] = { ...product, qty: 1 };
+    const product = findProduct(id);
+    if (!product) {
+      return;
+    }
+    cart[id] = {
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.image,
+      quantity: 1
+    };
   }
 
-  updateCartUI();
-  animateBadge();
+  updateCart();
+  animateCartBadge();
 }
 
-function updateQuantity(id, delta) {
-  if (!cart[id]) return;
-  cart[id].qty += delta;
-  if (cart[id].qty <= 0) delete cart[id];
-  updateCartUI();
+function updateQuantity(id, change) {
+  if (!isInCart(id)) {
+    return;
+  }
+
+  cart[id].quantity += change;
+
+  if (cart[id].quantity <= 0) {
+    delete cart[id];
+  }
+
+  updateCart();
 }
 
 function removeFromCart(id) {
   delete cart[id];
-  updateCartUI();
-}
-
-function updateCartUI() {
-  const items  = Object.values(cart);
-  const badge  = $('cartBadge');
-  const itemsEl = $('cartItems');
-
-  const totalQty = items.reduce((s, i) => s + i.qty, 0);
-  badge.textContent = totalQty;
-
-  if (!items.length) {
-    itemsEl.innerHTML = `
-      <div class="empty-cart">
-        <span>🛍️</span><p>Your cart is empty</p>
-      </div>`;
-  } else {
-    itemsEl.innerHTML = items.map(item => `
-      <div class="cart-item">
-        <img class="cart-item-img" src="${item.image}" alt="${item.title}" />
-        <div class="cart-item-info">
-          <p class="cart-item-title">${item.title}</p>
-          <span class="cart-item-price">$${(item.price * item.qty).toFixed(2)}</span>
-          <div class="qty-controls">
-            <button class="qty-btn" onclick="updateQuantity(${item.id},-1)">−</button>
-            <span class="qty-num">${item.qty}</span>
-            <button class="qty-btn" onclick="updateQuantity(${item.id},1)">+</button>
-          </div>
-        </div>
-        <button class="remove-btn" onclick="removeFromCart(${item.id})" title="Remove">🗑️</button>
-      </div>`).join('');
-  }
-
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax      = subtotal * TAX_RATE;
-  const shipping = subtotal > FREE_SHIPPING || subtotal === 0 ? 0 : 4.99;
-  const grand    = subtotal + tax + shipping;
-
-  $('subtotal').textContent     = `$${subtotal.toFixed(2)}`;
-  $('taxAmount').textContent    = `$${tax.toFixed(2)}`;
-  $('shippingAmount').textContent = shipping === 0 && subtotal > 0
-    ? '<span style="color:var(--success)">FREE</span>'
-    : `$${shipping.toFixed(2)}`;
-  $('grandTotal').textContent   = `$${grand.toFixed(2)}`;
-
-  const shipEl = $('shippingAmount');
-  if (shipping === 0 && subtotal > 0) {
-    shipEl.innerHTML = '<span style="color:var(--success);font-weight:600">FREE ✓</span>';
-  } else {
-    shipEl.textContent = shipping === 0 ? '$0.00' : `$${shipping.toFixed(2)}`;
-  }
-
-  sortProducts();
-}
-
-function toggleCart() {
-  $('cartDrawer').classList.toggle('open');
-  $('cartOverlay').classList.toggle('open');
-  document.body.style.overflow =
-    $('cartDrawer').classList.contains('open') ? 'hidden' : '';
-}
-
-function animateBadge() {
-  const badge = $('cartBadge');
-  badge.style.transform = 'scale(1.4)';
-  setTimeout(() => badge.style.transform = 'scale(1)', 250);
-}
-
-function openCheckout() {
-  const items = Object.values(cart);
-  if (!items.length) {
-    alert('Your cart is empty! Add some items first 🛒');
-    return;
-  }
-
-  const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const tax      = subtotal * TAX_RATE;
-  const shipping = subtotal > FREE_SHIPPING ? 0 : 4.99;
-  const grand    = subtotal + tax + shipping;
-
-  const summaryEl = $('orderSummary');
-  summaryEl.innerHTML = items.map(i => `
-    <div class="order-item-line">
-      <span>${i.title.substring(0,30)}… ×${i.qty}</span>
-      <span>$${(i.price * i.qty).toFixed(2)}</span>
-    </div>`).join('') +
-    `<div class="order-item-line" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-weight:700">
-      <span>Total</span><span>$${grand.toFixed(2)}</span>
-    </div>`;
-
-  $('cartDrawer').classList.remove('open');
-  $('cartOverlay').classList.remove('open');
-
-  $('checkoutModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeCheckout() {
-  $('checkoutModal').classList.remove('open');
-  document.body.style.overflow = '';
+  updateCart();
 }
 
 function clearCart() {
   cart = {};
-  updateCartUI();
+  updateCart();
 }
+
+function calculateTotals() {
+  let subtotal = 0;
+  for (const item of getCartItems()) {
+    subtotal += item.price * item.quantity;
+  }
+
+  const tax = subtotal * TAX_RATE;
+
+  let shipping = SHIPPING_COST;
+  if (subtotal === 0 || subtotal > FREE_SHIPPING_MINIMUM) {
+    shipping = 0;
+  }
+
+  return {
+    subtotal: subtotal,
+    tax: tax,
+    shipping: shipping,
+    total: subtotal + tax + shipping
+  };
+}
+
+function countCartItems() {
+  let count = 0;
+  for (const item of getCartItems()) {
+    count += item.quantity;
+  }
+  return count;
+}
+
+
+function updateCart() {
+  showCartItems();
+  showCartTotals();
+  updateAddButtons();
+}
+
+function showCartItems() {
+  const items = getCartItems();
+
+  if (items.length === 0) {
+    cartItemsList.innerHTML = `
+      <div class="empty-cart">
+        <span>🛍️</span>
+        <p>Your cart is empty</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  for (const item of items) {
+    html += createCartItemHtml(item);
+  }
+  cartItemsList.innerHTML = html;
+}
+
+function createCartItemHtml(item) {
+  const title = escapeHtml(item.title);
+
+  return `
+    <div class="cart-item">
+      <img class="cart-item-image" src="${item.image}" alt="${title}" />
+      <div class="cart-item-info">
+        <p class="cart-item-title">${title}</p>
+        <span class="cart-item-price">${formatPrice(item.price * item.quantity)}</span>
+        <div class="quantity-controls">
+          <button class="quantity-button" onclick="updateQuantity(${item.id}, -1)">−</button>
+          <span class="quantity-number">${item.quantity}</span>
+          <button class="quantity-button" onclick="updateQuantity(${item.id}, 1)">+</button>
+        </div>
+      </div>
+      <button class="remove-button" onclick="removeFromCart(${item.id})" title="Remove">🗑️</button>
+    </div>`;
+}
+
+function showCartTotals() {
+  const totals = calculateTotals();
+
+  cartBadge.textContent = countCartItems();
+  subtotalText.textContent = formatPrice(totals.subtotal);
+  taxText.textContent = formatPrice(totals.tax);
+  totalText.textContent = formatPrice(totals.total);
+
+  if (totals.shipping === 0 && totals.subtotal > 0) {
+    shippingText.innerHTML = '<span class="free-shipping">FREE ✓</span>';
+  } else {
+    shippingText.textContent = formatPrice(totals.shipping);
+  }
+}
+
+function updateAddButtons() {
+  const buttons = document.querySelectorAll('.add-to-cart-button');
+
+  for (const button of buttons) {
+    const id = Number(button.dataset.id);
+    button.textContent = isInCart(id) ? '✓' : '+';
+  }
+}
+
+function animateCartBadge() {
+  cartBadge.style.transform = 'scale(1.4)';
+
+  setTimeout(function () {
+    cartBadge.style.transform = 'scale(1)';
+  }, 250);
+}
+
+
+function handleSearch() {
+  showProducts();
+}
+
+function sortProducts() {
+  showProducts();
+}
+
+function filterCategory(button) {
+  const category = button.dataset.category;
+
+  const allCategoryButtons = document.querySelectorAll('.category-button');
+  for (const categoryButton of allCategoryButtons) {
+    categoryButton.classList.remove('active');
+  }
+  button.classList.add('active');
+
+  currentCategory = category;
+
+  if (category === 'all') {
+    sectionTitle.textContent = 'All Products';
+  } else {
+    sectionTitle.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+  }
+
+  showProducts();
+}
+
+function toggleCart() {
+  cartDrawer.classList.toggle('open');
+  cartOverlay.classList.toggle('open');
+
+  const cartIsOpen = cartDrawer.classList.contains('open');
+  lockPageScroll(cartIsOpen);
+}
+
+function openCheckout() {
+  const items = getCartItems();
+
+  if (items.length === 0) {
+    alert('Your cart is empty! Add some items first 🛒');
+    return;
+  }
+
+  let html = '';
+  for (const item of items) {
+    html += `
+    <div class="order-item-line">
+      <span>${escapeHtml(item.title.substring(0, 30))}… ×${item.quantity}</span>
+      <span>${formatPrice(item.price * item.quantity)}</span>
+    </div>`;
+  }
+
+  html += `
+    <div class="order-item-line order-total">
+      <span>Total</span><span>${formatPrice(calculateTotals().total)}</span>
+    </div>`;
+
+  orderSummary.innerHTML = html;
+
+  cartDrawer.classList.remove('open');
+  cartOverlay.classList.remove('open');
+  checkoutModal.classList.add('open');
+  lockPageScroll(true);
+}
+
+function closeCheckout() {
+  checkoutModal.classList.remove('open');
+  lockPageScroll(false);
+}
+
+function continueShopping() {
+  closeCheckout();
+  clearCart();
+}
+
+function scrollToProducts() {
+  document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+function formatPrice(price) {
+  return '$' + price.toFixed(2);
+}
+
+function escapeHtml(text) {
+  const temporaryElement = document.createElement('div');
+  temporaryElement.textContent = text;
+  return temporaryElement.innerHTML;
+}
+
+function lockPageScroll(shouldLock) {
+  document.body.style.overflow = shouldLock ? 'hidden' : '';
+}
+
+
+searchInput.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    handleSearch();
+  }
+});
+
+loadProducts();
