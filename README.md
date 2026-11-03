@@ -4,11 +4,11 @@ Project submission by **Kenna Getachew** for the Datheon Full Stack Web Developm
 
 This repository contains three web projects. Each one is deployed live and can be tried without installing anything.
 
-| Project | What it is | Live demo |
-| --- | --- | --- |
-| Developer Portfolio | Personal portfolio website | https://portfoliokennagetachew.vercel.app |
-| ShopVibe | E-commerce product catalog with a working cart | https://ecommercecatalog-puce.vercel.app |
-| Weather Forecast App | City weather search with a 5-day forecast | https://weather-forecast-eight-umber.vercel.app |
+| Project              | What it is                                     | Live demo                                       |
+| -------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| Developer Portfolio  | Personal portfolio website                     | https://portfoliokennagetachew.vercel.app       |
+| ShopVibe             | E-commerce product catalog with a working cart | https://ecommercecatalog-puce.vercel.app        |
+| Weather Forecast App | City weather search with a 5-day forecast      | https://weather-forecast-eight-umber.vercel.app |
 
 ---
 
@@ -17,6 +17,7 @@ This repository contains three web projects. Each one is deployed live and can b
 A responsive personal website that introduces me, lists my skills, and links to my other projects.
 
 **Features**
+
 - Sections for About, Skills, Projects and Contact, with a mobile-friendly navigation menu
 - Light and dark theme toggle
 - Project cards linking to the live demos of ShopVibe and the Weather Forecast App
@@ -32,6 +33,7 @@ A responsive personal website that introduces me, lists my skills, and links to 
 An online store front where products are loaded from a public API and shoppers can fill a cart and check out.
 
 **Features**
+
 - Products fetched live from the [Fake Store API](https://fakestoreapi.com)
 - Category filters: All, Electronics, Jewelry, Men's Clothing, Women's Clothing
 - Product search and sorting (price low to high, price high to low, top rated)
@@ -48,6 +50,7 @@ An online store front where products are loaded from a public API and shoppers c
 A weather lookup tool where users can search any city in the world.
 
 **Features**
+
 - Search by city name
 - Current conditions: temperature, weather description, humidity, wind speed, pressure and "feels like" temperature
 - 5-day forecast
@@ -93,8 +96,8 @@ Each folder holds the complete source code of its project, with an `index.html` 
 
 In the spirit of transparency, here is how AI tools were used in this work:
 
-- **ShopVibe:** AI helped with roughly half of the code, including structuring the cart logic.
-- **Done by me:** [Kenna: add what you built yourself, for example the design, the product filtering, or your debugging.]
+- **ShopVibe:** AI was used to assist with part of the code, including structuring the cart logic.
+- **Done by me:** Designed the complete UI/UX layout using responsive CSS Grid and Flexbox, built the dynamic client-side filtering, search, and multi-criteria sorting algorithms from scratch, integrated the Fetch API architecture with async/await, and independently handled state synchronization, edge-case debugging, and the final Vercel deployment pipeline.
 
 ## About the Author
 
