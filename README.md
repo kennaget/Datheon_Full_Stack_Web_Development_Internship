@@ -101,7 +101,7 @@ In the spirit of transparency, here is how AI tools were used in this work:
 
 ## About the Author
 
-**Kenna Getachew** is a Computer Science student at St. Mary's University in Addis Ababa, Ethiopia, with skills in HTML, CSS, JavaScript, React, Node.js, Express.js, SQL, Java and C++. He is looking for a remote internship or entry-level role.
+**Kenna Getachew** is a Computer Science student at St. Mary's University in Addis Ababa, Ethiopia, with skills in HTML, CSS, JavaScript, React, Node.js, Express.js, SQL, Java , Data Struction and Algorithm , Object-Oriented Programming and C++. She is looking for a remote entry-level role or internship.
 
 - Email: kennaget04@gmail.com
 - GitHub: https://github.com/kennaget
