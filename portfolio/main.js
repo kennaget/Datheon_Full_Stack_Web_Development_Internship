@@ -1,69 +1,94 @@
-var hamburger = document.getElementById("hamburger");
-var navLinks  = document.getElementById("nav-links");
+const THEME_STORAGE_KEY = "theme";
+const MOON_ICON = "🌙";
+const SUN_ICON = "☀️";
 
-hamburger.addEventListener("click", function () {
-  if (navLinks.classList.contains("open")) {
-    navLinks.classList.remove("open");
-  } else {
-    navLinks.classList.add("open");
-  }
-});
+const navLinks = document.getElementById("navLinks");
+const hamburger = document.getElementById("hamburger");
+const themeToggle = document.getElementById("themeToggle");
 
-var links = navLinks.querySelectorAll("a");
-for (var i = 0; i < links.length; i++) {
-  links[i].addEventListener("click", function () {
-    navLinks.classList.remove("open");
-  });
+const contactForm = document.getElementById("contactForm");
+const nameInput = document.getElementById("nameInput");
+const emailInput = document.getElementById("emailInput");
+const messageInput = document.getElementById("messageInput");
+const formError = document.getElementById("formError");
+const formSuccess = document.getElementById("formSuccess");
+
+
+function toggleMenu() {
+  navLinks.classList.toggle("open");
 }
 
-var form    = document.getElementById("contact-form");
-var errorEl = document.getElementById("form-error");
-var successEl = document.getElementById("form-success");
+function closeMenu() {
+  navLinks.classList.remove("open");
+}
 
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
+hamburger.addEventListener("click", toggleMenu);
 
-  var name    = document.getElementById("name").value.trim();
-  var email   = document.getElementById("email").value.trim();
-  var message = document.getElementById("message").value.trim();
+for (const link of navLinks.querySelectorAll("a")) {
+  link.addEventListener("click", closeMenu);
+}
 
-  errorEl.textContent   = "";
-  successEl.textContent = "";
 
+function getContactFormError(name, email, message) {
   if (name === "") {
-    errorEl.textContent = "Please enter your name.";
-    return;
+    return "Please enter your name.";
   }
 
   if (email === "" || !email.includes("@")) {
-    errorEl.textContent = "Please enter a valid email address.";
-    return;
+    return "Please enter a valid email address.";
   }
 
   if (message === "") {
-    errorEl.textContent = "Please enter a message.";
+    return "Please enter a message.";
+  }
+
+  return "";
+}
+
+function handleContactSubmit(event) {
+  event.preventDefault();
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  formError.textContent = "";
+  formSuccess.textContent = "";
+
+  const errorText = getContactFormError(name, email, message);
+
+  if (errorText !== "") {
+    formError.textContent = errorText;
     return;
   }
 
-  successEl.textContent = "Thanks! Your message has been sent.";
-  form.reset();
-});
-
-var themeToggle = document.getElementById("theme-toggle");
-
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark-mode");
-  themeToggle.innerHTML = "&#9728;&#65039;";
+  formSuccess.textContent = "Thanks! Your message has been sent.";
+  contactForm.reset();
 }
 
-themeToggle.addEventListener("click", function () {
-  if (document.body.classList.contains("dark-mode")) {
-    document.body.classList.remove("dark-mode");
-    localStorage.setItem("theme", "light");
-    themeToggle.innerHTML = "&#127769;";
-  } else {
-    document.body.classList.add("dark-mode");
-    localStorage.setItem("theme", "dark");
-    themeToggle.innerHTML = "&#9728;&#65039;";
-  }
-});
+contactForm.addEventListener("submit", handleContactSubmit);
+
+
+function isDarkMode() {
+  return document.body.classList.contains("dark-mode");
+}
+
+function applyTheme(theme) {
+  const isDark = theme === "dark";
+
+  document.body.classList.toggle("dark-mode", isDark);
+  themeToggle.textContent = isDark ? SUN_ICON : MOON_ICON;
+}
+
+function toggleTheme() {
+  const newTheme = isDarkMode() ? "light" : "dark";
+
+  applyTheme(newTheme);
+  localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+}
+
+if (localStorage.getItem(THEME_STORAGE_KEY) === "dark") {
+  applyTheme("dark");
+}
+
+themeToggle.addEventListener("click", toggleTheme);
